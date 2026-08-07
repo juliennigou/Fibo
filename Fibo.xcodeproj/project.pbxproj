@@ -1,0 +1,366 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B00000000000000000000001 /* FiboApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000001 /* FiboApp.swift */; };
+		B00000000000000000000002 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000002 /* AppTheme.swift */; };
+		B00000000000000000000003 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000003 /* Formatters.swift */; };
+		B00000000000000000000004 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000004 /* Models.swift */; };
+		B00000000000000000000005 /* MyfxbookAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000005 /* MyfxbookAPI.swift */; };
+		B00000000000000000000006 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000006 /* KeychainStore.swift */; };
+		B00000000000000000000007 /* SnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000007 /* SnapshotCache.swift */; };
+		B00000000000000000000008 /* DashboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000008 /* DashboardStore.swift */; };
+		B00000000000000000000009 /* BackgroundRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000009 /* BackgroundRefresh.swift */; };
+		B0000000000000000000000A /* CommonComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000A /* CommonComponents.swift */; };
+		B0000000000000000000000B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000B /* OnboardingView.swift */; };
+		B0000000000000000000000C /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000C /* RootView.swift */; };
+		B0000000000000000000000D /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000D /* DashboardView.swift */; };
+		B0000000000000000000000E /* PositionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000E /* PositionsView.swift */; };
+		B0000000000000000000000F /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000F /* ActivityView.swift */; };
+		B00000000000000000000010 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000010 /* SettingsView.swift */; };
+		B00000000000000000000012 /* MyfxbookAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000013 /* MyfxbookAPITests.swift */; };
+		B00000000000000000000013 /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000014 /* ModelTests.swift */; };
+		B00000000000000000000014 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000015 /* PreviewData.swift */; };
+		B00000000000000000000015 /* AppIcon60x60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000016 /* AppIcon60x60@2x.png */; };
+		B00000000000000000000016 /* AppIcon60x60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000017 /* AppIcon60x60@3x.png */; };
+		B00000000000000000000017 /* FiboBrandIcon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000018 /* FiboBrandIcon@2x.png */; };
+		B00000000000000000000018 /* FiboBrandIcon@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000019 /* FiboBrandIcon@3x.png */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		X00000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = Q00000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = T00000000000000000000001;
+			remoteInfo = Fibo;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		F00000000000000000000001 /* FiboApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/App/FiboApp.swift; sourceTree = "<group>"; };
+		F00000000000000000000002 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Core/AppTheme.swift; sourceTree = "<group>"; };
+		F00000000000000000000003 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Core/Formatters.swift; sourceTree = "<group>"; };
+		F00000000000000000000004 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Core/Models.swift; sourceTree = "<group>"; };
+		F00000000000000000000005 /* MyfxbookAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Core/MyfxbookAPI.swift; sourceTree = "<group>"; };
+		F00000000000000000000006 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Core/KeychainStore.swift; sourceTree = "<group>"; };
+		F00000000000000000000007 /* SnapshotCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Core/SnapshotCache.swift; sourceTree = "<group>"; };
+		F00000000000000000000008 /* DashboardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Core/DashboardStore.swift; sourceTree = "<group>"; };
+		F00000000000000000000009 /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Core/BackgroundRefresh.swift; sourceTree = "<group>"; };
+		F0000000000000000000000A /* CommonComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Components/CommonComponents.swift; sourceTree = "<group>"; };
+		F0000000000000000000000B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/OnboardingView.swift; sourceTree = "<group>"; };
+		F0000000000000000000000C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/RootView.swift; sourceTree = "<group>"; };
+		F0000000000000000000000D /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/DashboardView.swift; sourceTree = "<group>"; };
+		F0000000000000000000000E /* PositionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/PositionsView.swift; sourceTree = "<group>"; };
+		F0000000000000000000000F /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/ActivityView.swift; sourceTree = "<group>"; };
+		F00000000000000000000010 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/SettingsView.swift; sourceTree = "<group>"; };
+		F00000000000000000000011 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Fibo/Resources/Assets.xcassets; sourceTree = "<group>"; };
+		F00000000000000000000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Fibo/Resources/Info.plist; sourceTree = "<group>"; };
+		F00000000000000000000013 /* MyfxbookAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiboTests/MyfxbookAPITests.swift; sourceTree = "<group>"; };
+		F00000000000000000000014 /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiboTests/ModelTests.swift; sourceTree = "<group>"; };
+		F00000000000000000000015 /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Core/PreviewData.swift; sourceTree = "<group>"; };
+		F00000000000000000000016 /* AppIcon60x60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Fibo/Resources/AppIcon60x60@2x.png"; sourceTree = "<group>"; };
+		F00000000000000000000017 /* AppIcon60x60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Fibo/Resources/AppIcon60x60@3x.png"; sourceTree = "<group>"; };
+		F00000000000000000000018 /* FiboBrandIcon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Fibo/Resources/FiboBrandIcon@2x.png"; sourceTree = "<group>"; };
+		F00000000000000000000019 /* FiboBrandIcon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Fibo/Resources/FiboBrandIcon@3x.png"; sourceTree = "<group>"; };
+		R00000000000000000000001 /* Fibo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fibo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		R00000000000000000000002 /* FiboTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FiboTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		P00000000000000000000002 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		P00000000000000000000005 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		G00000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				G00000000000000000000002 /* Application */,
+				G00000000000000000000003 /* Tests */,
+				G00000000000000000000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		G00000000000000000000002 /* Application */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000001 /* FiboApp.swift */,
+				F00000000000000000000002 /* AppTheme.swift */,
+				F00000000000000000000003 /* Formatters.swift */,
+				F00000000000000000000004 /* Models.swift */,
+				F00000000000000000000005 /* MyfxbookAPI.swift */,
+				F00000000000000000000006 /* KeychainStore.swift */,
+				F00000000000000000000007 /* SnapshotCache.swift */,
+				F00000000000000000000008 /* DashboardStore.swift */,
+				F00000000000000000000009 /* BackgroundRefresh.swift */,
+				F00000000000000000000015 /* PreviewData.swift */,
+				F0000000000000000000000A /* CommonComponents.swift */,
+				F0000000000000000000000B /* OnboardingView.swift */,
+				F0000000000000000000000C /* RootView.swift */,
+				F0000000000000000000000D /* DashboardView.swift */,
+				F0000000000000000000000E /* PositionsView.swift */,
+				F0000000000000000000000F /* ActivityView.swift */,
+				F00000000000000000000010 /* SettingsView.swift */,
+				F00000000000000000000011 /* Assets.xcassets */,
+				F00000000000000000000016 /* AppIcon60x60@2x.png */,
+				F00000000000000000000017 /* AppIcon60x60@3x.png */,
+				F00000000000000000000018 /* FiboBrandIcon@2x.png */,
+				F00000000000000000000019 /* FiboBrandIcon@3x.png */,
+				F00000000000000000000012 /* Info.plist */,
+			);
+			name = Fibo;
+			sourceTree = "<group>";
+		};
+		G00000000000000000000003 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000013 /* MyfxbookAPITests.swift */,
+				F00000000000000000000014 /* ModelTests.swift */,
+			);
+			name = FiboTests;
+			sourceTree = "<group>";
+		};
+		G00000000000000000000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				R00000000000000000000001 /* Fibo.app */,
+				R00000000000000000000002 /* FiboTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		T00000000000000000000001 /* Fibo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = L00000000000000000000002 /* Build configuration list for PBXNativeTarget "Fibo" */;
+			buildPhases = (
+				P00000000000000000000001 /* Sources */,
+				P00000000000000000000002 /* Frameworks */,
+				P00000000000000000000003 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = Fibo;
+			productName = Fibo;
+			productReference = R00000000000000000000001 /* Fibo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		T00000000000000000000002 /* FiboTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = L00000000000000000000003 /* Build configuration list for PBXNativeTarget "FiboTests" */;
+			buildPhases = (
+				P00000000000000000000004 /* Sources */,
+				P00000000000000000000005 /* Frameworks */,
+				P00000000000000000000006 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = (
+				X00000000000000000000002 /* PBXTargetDependency */,
+			);
+			name = FiboTests;
+			productName = FiboTests;
+			productReference = R00000000000000000000002 /* FiboTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		Q00000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					T00000000000000000000001 = { CreatedOnToolsVersion = 15.0; };
+					T00000000000000000000002 = { CreatedOnToolsVersion = 15.0; TestTargetID = T00000000000000000000001; };
+				};
+			};
+			buildConfigurationList = L00000000000000000000001 /* Build configuration list for PBXProject "Fibo" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = fr;
+			hasScannedForEncodings = 0;
+			knownRegions = (fr, en, Base);
+			mainGroup = G00000000000000000000001;
+			productRefGroup = G00000000000000000000004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				T00000000000000000000001 /* Fibo */,
+				T00000000000000000000002 /* FiboTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		P00000000000000000000003 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B00000000000000000000015 /* AppIcon60x60@2x.png in Resources */, B00000000000000000000016 /* AppIcon60x60@3x.png in Resources */, B00000000000000000000017 /* FiboBrandIcon@2x.png in Resources */, B00000000000000000000018 /* FiboBrandIcon@3x.png in Resources */, ); runOnlyForDeploymentPostprocessing = 0; };
+		P00000000000000000000006 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		P00000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00000000000000000000001 /* FiboApp.swift in Sources */,
+				B00000000000000000000002 /* AppTheme.swift in Sources */,
+				B00000000000000000000003 /* Formatters.swift in Sources */,
+				B00000000000000000000004 /* Models.swift in Sources */,
+				B00000000000000000000005 /* MyfxbookAPI.swift in Sources */,
+				B00000000000000000000006 /* KeychainStore.swift in Sources */,
+				B00000000000000000000007 /* SnapshotCache.swift in Sources */,
+				B00000000000000000000008 /* DashboardStore.swift in Sources */,
+				B00000000000000000000009 /* BackgroundRefresh.swift in Sources */,
+				B0000000000000000000000A /* CommonComponents.swift in Sources */,
+				B0000000000000000000000B /* OnboardingView.swift in Sources */,
+				B0000000000000000000000C /* RootView.swift in Sources */,
+				B0000000000000000000000D /* DashboardView.swift in Sources */,
+				B0000000000000000000000E /* PositionsView.swift in Sources */,
+				B0000000000000000000000F /* ActivityView.swift in Sources */,
+				B00000000000000000000010 /* SettingsView.swift in Sources */,
+				B00000000000000000000014 /* PreviewData.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		P00000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00000000000000000000012 /* MyfxbookAPITests.swift in Sources */,
+				B00000000000000000000013 /* ModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		X00000000000000000000002 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = T00000000000000000000001 /* Fibo */; targetProxy = X00000000000000000000001 /* PBXContainerItemProxy */; };
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		C00000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C00000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C00000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Fibo/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Fibo;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.juliennigou.Fibo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		C00000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Fibo/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Fibo;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.juliennigou.Fibo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		C00000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.juliennigou.FiboTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Fibo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Fibo";
+			};
+			name = Debug;
+		};
+		C00000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.juliennigou.FiboTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Fibo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Fibo";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		L00000000000000000000001 /* Build configuration list for PBXProject "Fibo" */ = {isa = XCConfigurationList; buildConfigurations = (C00000000000000000000001 /* Debug */, C00000000000000000000002 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		L00000000000000000000002 /* Build configuration list for PBXNativeTarget "Fibo" */ = {isa = XCConfigurationList; buildConfigurations = (C00000000000000000000003 /* Debug */, C00000000000000000000004 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		L00000000000000000000003 /* Build configuration list for PBXNativeTarget "FiboTests" */ = {isa = XCConfigurationList; buildConfigurations = (C00000000000000000000005 /* Debug */, C00000000000000000000006 /* Release */, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = Q00000000000000000000001 /* Project object */;
+}
