@@ -1,10 +1,39 @@
 import SwiftUI
+import UIKit
+
+struct BrandMark: View {
+    var size: CGFloat = 42
+
+    @ViewBuilder
+    var body: some View {
+        if let iconURL = Bundle.main.url(forResource: "FiboBrandIcon@3x", withExtension: "png"),
+           let icon = UIImage(contentsOfFile: iconURL.path) {
+            Image(uiImage: icon)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: size * 0.28, style: .continuous))
+                .accessibilityLabel("Fibo")
+        } else {
+            Image(systemName: "arrow.up.right")
+                .font(.system(size: size * 0.42, weight: .black, design: .rounded))
+                .foregroundStyle(AppTheme.lime)
+                .frame(width: size, height: size)
+                .background(AppTheme.primary)
+                .clipShape(RoundedRectangle(cornerRadius: size * 0.28, style: .continuous))
+                .accessibilityLabel("Fibo")
+        }
+    }
+}
 
 struct AppHeader: View {
     let title: String
     var subtitle: String?
     var trailingSymbol: String?
     var trailingAction: (() -> Void)?
+    var isTrailingActive = false
+    var usesBrandStyle = false
 
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
@@ -22,14 +51,33 @@ struct AppHeader: View {
             if let trailingSymbol {
                 Button(action: { trailingAction?() }) {
                     Image(systemName: trailingSymbol)
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(AppTheme.ink)
-                        .frame(width: 44, height: 44)
-                        .background(Color.white)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(usesBrandStyle ? AppTheme.lime : AppTheme.primaryDeep)
+                        .rotationEffect(.degrees(isTrailingActive ? 360 : 0))
+                        .animation(
+                            isTrailingActive
+                                ? .linear(duration: 0.85).repeatForever(autoreverses: false)
+                                : .default,
+                            value: isTrailingActive
+                        )
+                        .frame(width: 46, height: 46)
+                        .background(usesBrandStyle ? AppTheme.primary : AppTheme.primarySoft)
                         .clipShape(Circle())
-                        .overlay { Circle().stroke(AppTheme.line, lineWidth: 0.5) }
+                        .overlay {
+                            Circle().stroke(
+                                usesBrandStyle ? AppTheme.lime.opacity(0.32) : AppTheme.line,
+                                lineWidth: usesBrandStyle ? 2 : 1
+                            )
+                        }
+                        .shadow(
+                            color: usesBrandStyle ? AppTheme.primary.opacity(0.2) : .clear,
+                            radius: 12,
+                            y: 6
+                        )
                 }
                 .buttonStyle(.plain)
+                .disabled(isTrailingActive)
+                .accessibilityLabel(isTrailingActive ? "Actualisation en cours" : "Actualiser")
             }
         }
     }
@@ -55,7 +103,7 @@ struct MetricCard: View {
     let title: String
     let value: String
     let symbol: String
-    var tint: Color = AppTheme.blue
+    var tint: Color = AppTheme.primary
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -109,9 +157,9 @@ struct EmptyStateCard: View {
         VStack(spacing: 12) {
             Image(systemName: symbol)
                 .font(.system(size: 24, weight: .medium))
-                .foregroundStyle(AppTheme.blue)
+                .foregroundStyle(AppTheme.primary)
                 .frame(width: 52, height: 52)
-                .background(AppTheme.blueSoft)
+                .background(AppTheme.primarySoft)
                 .clipShape(Circle())
             Text(title)
                 .font(.system(.headline, design: .rounded, weight: .bold))
@@ -156,12 +204,14 @@ struct DirectionBadge: View {
 
 struct LoadingOverlay: View {
     let title: String
+    @State private var isAnimating = false
 
     var body: some View {
         VStack(spacing: 16) {
-            ProgressView()
-                .tint(AppTheme.blue)
-                .scaleEffect(1.2)
+            BrandMark(size: 64)
+                .scaleEffect(isAnimating ? 1.04 : 0.92)
+                .rotationEffect(.degrees(isAnimating ? 3 : -3))
+                .shadow(color: AppTheme.primary.opacity(0.2), radius: 18)
             Text(title)
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(AppTheme.secondary)
@@ -169,5 +219,10 @@ struct LoadingOverlay: View {
         .padding(28)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .task {
+            withAnimation(.easeInOut(duration: 0.85).repeatForever(autoreverses: true)) {
+                isAnimating = true
+            }
+        }
     }
 }

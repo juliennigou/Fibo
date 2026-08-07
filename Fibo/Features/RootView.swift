@@ -2,23 +2,53 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject private var store: DashboardStore
+    @State private var isShowingSplash = true
 
     var body: some View {
-        Group {
-            if store.isAuthenticated {
-                MainTabView()
-            } else {
-                OnboardingView()
+        ZStack {
+            Group {
+                if store.isAuthenticated {
+                    MainTabView()
+                } else {
+                    OnboardingView()
+                }
+            }
+            .animation(.easeInOut(duration: 0.25), value: store.isAuthenticated)
+
+            if isShowingSplash {
+                SplashView(isReady: isBootstrapFinished) {
+                    withAnimation(.easeOut(duration: 0.35)) {
+                        isShowingSplash = false
+                    }
+                }
+                .transition(.opacity)
+                .zIndex(1)
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: store.isAuthenticated)
         .task { await store.bootstrap() }
+    }
+
+    /// Le splash se retire dès que le premier chargement est terminé
+    /// (données affichables, erreur, ou utilisateur non connecté).
+    private var isBootstrapFinished: Bool {
+        switch store.state {
+        case .loading, .connecting:
+            return store.hasContent
+        case .ready, .refreshing, .failed, .signedOut:
+            return true
+        }
     }
 }
 
 struct MainTabView: View {
     @EnvironmentObject private var store: DashboardStore
-    @State private var selection = 0
+    @State private var selection = Self.initialSelection
+
+    private static var initialSelection: Int {
+        if ProcessInfo.processInfo.arguments.contains("--activity") { return 1 }
+        if ProcessInfo.processInfo.arguments.contains("--projection") { return 2 }
+        return 0
+    }
 
     var body: some View {
         ZStack {
@@ -27,19 +57,19 @@ struct MainTabView: View {
                     .tag(0)
                     .tabItem { Label("Accueil", systemImage: "house.fill") }
 
-                PositionsView()
+                TradingActivityView()
                     .tag(1)
-                    .tabItem { Label("Positions", systemImage: "arrow.up.arrow.down") }
+                    .tabItem { Label("Activité", systemImage: "arrow.up.arrow.down.circle.fill") }
 
-                ActivityView()
+                ProjectionView()
                     .tag(2)
-                    .tabItem { Label("Historique", systemImage: "clock.fill") }
+                    .tabItem { Label("Projection", systemImage: "function") }
 
                 SettingsView()
                     .tag(3)
                     .tabItem { Label("Réglages", systemImage: "gearshape.fill") }
             }
-            .tint(AppTheme.blue)
+            .tint(AppTheme.primary)
             .toolbarBackground(.visible, for: .tabBar)
             .toolbarBackground(.ultraThinMaterial, for: .tabBar)
 

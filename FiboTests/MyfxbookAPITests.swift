@@ -95,11 +95,32 @@ final class MyfxbookAPITests: XCTestCase {
         }
     }
 
+    func testLoginRateLimitIsNotReportedAsExpiredSession() async {
+        let message = "Max login attempts reached, Please try to login via website"
+        let api = makeAPI(json: #"{"error":true,"message":"Max login attempts reached, Please try to login via website","session":""}"#)
+
+        do {
+            _ = try await api.login(email: "test@example.com", password: "invalid")
+            XCTFail("Expected API error")
+        } catch let error as MyfxbookError {
+            XCTAssertEqual(error, .api(message))
+            XCTAssertEqual(
+                error.errorDescription,
+                "Trop de tentatives Myfxbook. Connecte-toi d’abord sur myfxbook.com, puis réessaie dans Fibo."
+            )
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
     func testLoginPreservesSpecialCharactersInCredentials() async throws {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [MockURLProtocol.self]
         MockURLProtocol.handler = { request in
-            let items = URLComponents(url: try XCTUnwrap(request.url), resolvingAgainstBaseURL: false)?.queryItems
+            let url = try XCTUnwrap(request.url)
+            XCTAssertTrue(url.absoluteString.contains("dev%2Btrading"))
+            XCTAssertTrue(url.absoluteString.contains("Example%2B"))
+            let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
             let query = Dictionary(uniqueKeysWithValues: (items ?? []).compactMap { item in
                 item.value.map { (item.name, $0) }
             })
@@ -114,6 +135,47 @@ final class MyfxbookAPITests: XCTestCase {
         let api = MyfxbookAPI(session: URLSession(configuration: configuration))
         let session = try await api.login(email: "dev+trading@example.com", password: "Example+&$42")
         XCTAssertEqual(session, "safe-session")
+    }
+
+    func testLoginTrimsSessionWhitespace() async throws {
+        let api = makeAPI(json: #"{"error":false,"message":"","session":"  safe-session\n"}"#)
+
+        let session = try await api.login(email: "test@example.com", password: "password")
+
+        XCTAssertEqual(session, "safe-session")
+    }
+
+    func testPercentEncodedSessionIsDecodedBeforeReuse() async throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [MockURLProtocol.self]
+        var requestCount = 0
+        MockURLProtocol.handler = { request in
+            requestCount += 1
+            if requestCount == 1 {
+                return (
+                    HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!,
+                    Data(#"{"error":false,"message":"","session":"abc%2Bdef%3D%3D"}"#.utf8)
+                )
+            }
+
+            let requestURL = try XCTUnwrap(request.url)
+            let encodedQuery = try XCTUnwrap(
+                URLComponents(url: requestURL, resolvingAgainstBaseURL: false)?.percentEncodedQuery
+            )
+            XCTAssertTrue(encodedQuery.contains("session=abc%2Bdef%3D%3D"))
+            XCTAssertFalse(encodedQuery.contains("%252B"))
+            return (
+                HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!,
+                Data(#"{"error":false,"message":"","accounts":[]}"#.utf8)
+            )
+        }
+
+        let api = MyfxbookAPI(session: URLSession(configuration: configuration))
+        let session = try await api.login(email: "test@example.com", password: "password")
+        XCTAssertEqual(session, "abc+def==")
+
+        _ = try await api.accounts(sessionID: session)
+        XCTAssertEqual(requestCount, 2)
     }
 
     private func makeAPI(json: String) -> MyfxbookAPI {
