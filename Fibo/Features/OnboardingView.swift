@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct OnboardingView: View {
     @EnvironmentObject private var store: DashboardStore
@@ -43,23 +42,8 @@ struct OnboardingView: View {
         }
     }
 
-    @ViewBuilder
     private var brandIcon: some View {
-        if let iconURL = Bundle.main.url(forResource: "FiboBrandIcon@3x", withExtension: "png"),
-           let icon = UIImage(contentsOfFile: iconURL.path) {
-            SwiftUI.Image(uiImage: icon)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 46, height: 46)
-                .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
-        } else {
-            SwiftUI.Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: 46, height: 46)
-                .background(AppTheme.blue)
-                .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
-        }
+        BrandMark(size: 46)
     }
 
     private var hero: some View {
@@ -141,7 +125,7 @@ struct OnboardingView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
                 .foregroundStyle(.white)
-                .background(canConnect ? AppTheme.blue : AppTheme.blue.opacity(0.35))
+                .background(canConnect ? AppTheme.primary : AppTheme.primary.opacity(0.35))
                 .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
             }
             .disabled(!canConnect)

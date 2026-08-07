@@ -62,9 +62,9 @@ struct SettingsView: View {
             HStack(spacing: 13) {
                 Image(systemName: "building.columns.fill")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(AppTheme.blue)
+                    .foregroundStyle(AppTheme.primary)
                     .frame(width: 46, height: 46)
-                    .background(AppTheme.blueSoft)
+                    .background(AppTheme.primarySoft)
                     .clipShape(Circle())
                 VStack(alignment: .leading, spacing: 3) {
                     Text(account.name.isEmpty ? "Compte Myfxbook" : account.name)
@@ -82,7 +82,7 @@ struct SettingsView: View {
                 )
             }
 
-            Divider().overlay(AppTheme.line)
+            Divider().overlay(AppTheme.cardLine)
 
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
@@ -115,7 +115,7 @@ struct SettingsView: View {
                         }
                         Spacer()
                         if account.id == store.account?.id {
-                            Image(systemName: "checkmark.circle.fill").foregroundStyle(AppTheme.blue)
+                            Image(systemName: "checkmark.circle.fill").foregroundStyle(AppTheme.primary)
                         }
                     }
                     .foregroundStyle(AppTheme.ink)
@@ -129,14 +129,14 @@ struct SettingsView: View {
 
     private var dataSection: some View {
         settingsCard(title: "Données") {
-            settingsRow(symbol: "arrow.clockwise", tint: AppTheme.blue, title: "Synchroniser maintenant") {
+            settingsRow(symbol: "arrow.clockwise", tint: AppTheme.primary, title: "Synchroniser maintenant") {
                 Task { await store.refresh() }
             }
-            Divider().overlay(AppTheme.line).padding(.leading, 48)
-            settingsRow(symbol: "safari.fill", tint: AppTheme.blue, title: "Ouvrir Myfxbook") {
+            Divider().overlay(AppTheme.cardLine).padding(.leading, 48)
+            settingsRow(symbol: "safari.fill", tint: AppTheme.primary, title: "Ouvrir Myfxbook") {
                 if let url = URL(string: "https://www.myfxbook.com") { openURL(url) }
             }
-            Divider().overlay(AppTheme.line).padding(.leading, 48)
+            Divider().overlay(AppTheme.cardLine).padding(.leading, 48)
             HStack(spacing: 13) {
                 Image(systemName: "bolt.horizontal.circle.fill")
                     .foregroundStyle(AppTheme.positive)
@@ -166,10 +166,10 @@ struct SettingsView: View {
                 title: "Identifiants protégés",
                 detail: "Keychain · cet iPhone uniquement"
             )
-            Divider().overlay(AppTheme.line).padding(.leading, 48)
+            Divider().overlay(AppTheme.cardLine).padding(.leading, 48)
             infoRow(
                 symbol: "eye.fill",
-                tint: AppTheme.blue,
+                tint: AppTheme.primary,
                 title: "Consultation uniquement",
                 detail: "Aucune fonction de passage d’ordre"
             )
@@ -180,11 +180,11 @@ struct SettingsView: View {
         settingsCard(title: "À propos") {
             infoRow(
                 symbol: "chart.xyaxis.line",
-                tint: AppTheme.blue,
+                tint: AppTheme.primary,
                 title: "Fibo Dashboard",
                 detail: "Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")"
             )
-            Divider().overlay(AppTheme.line).padding(.leading, 48)
+            Divider().overlay(AppTheme.cardLine).padding(.leading, 48)
             infoRow(
                 symbol: "network",
                 tint: AppTheme.warning,

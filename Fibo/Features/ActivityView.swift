@@ -4,6 +4,11 @@ struct ActivityView: View {
     @EnvironmentObject private var store: DashboardStore
     @State private var searchText = ""
     @State private var selectedSegment = 0
+    private let sectionSelection: Binding<Int>?
+
+    init(sectionSelection: Binding<Int>? = nil) {
+        self.sectionSelection = sectionSelection
+    }
 
     var body: some View {
         NavigationStack {
@@ -12,6 +17,10 @@ struct ActivityView: View {
                 ScrollView {
                     LazyVStack(spacing: 20) {
                         AppHeader(title: "Historique", subtitle: "Rapports et transactions")
+
+                        if let sectionSelection {
+                            ActivityPagePicker(selection: sectionSelection)
+                        }
 
                         if let snapshot = store.snapshot {
                             Picker("Vue", selection: $selectedSegment) {
@@ -54,7 +63,7 @@ struct ActivityView: View {
                     title: "Profit factor",
                     value: snapshot.account.profitFactor == 0 ? "—" : AppFormat.decimal(snapshot.account.profitFactor),
                     symbol: "scalemass",
-                    tint: AppTheme.blue
+                    tint: AppTheme.primary
                 )
             }
 
@@ -118,6 +127,35 @@ struct ActivityView: View {
                 }
             }
         }
+    }
+}
+
+struct TradingActivityView: View {
+    @State private var selectedPage = 0
+
+    var body: some View {
+        TabView(selection: $selectedPage) {
+            PositionsView(sectionSelection: $selectedPage)
+                .tag(0)
+
+            ActivityView(sectionSelection: $selectedPage)
+                .tag(1)
+        }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        .background(AppTheme.background.ignoresSafeArea())
+    }
+}
+
+struct ActivityPagePicker: View {
+    @Binding var selection: Int
+
+    var body: some View {
+        Picker("Activité", selection: $selection) {
+            Text("Positions").tag(0)
+            Text("Historique").tag(1)
+        }
+        .pickerStyle(.segmented)
+        .accessibilityLabel("Type d’activité")
     }
 }
 

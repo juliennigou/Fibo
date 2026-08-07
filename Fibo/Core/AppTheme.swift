@@ -1,17 +1,29 @@
 import SwiftUI
 
 enum AppTheme {
-    static let blue = Color(hex: 0x4464FF)
-    static let blueDeep = Color(hex: 0x2F4CE5)
-    static let blueSoft = Color(hex: 0xEEF1FF)
-    static let background = Color(hex: 0xF7F7FA)
-    static let card = Color.white
-    static let ink = Color(hex: 0x15192B)
-    static let secondary = Color(hex: 0x75798C)
-    static let line = Color(hex: 0xE9EAF0)
+    static let primary = Color(hex: 0x6817E8)
+    static let primaryDeep = Color(hex: 0x25104D)
+    static let primarySoft = Color(hex: 0xF1EAFF)
+    static let lime = Color(hex: 0xC9FF00)
+    static let limeDeep = Color(hex: 0x425500)
+    static let background = Color(hex: 0xFAF9F5)
+    /// Surface des cartes : transparente, les blocs se détachent par un filet
+    /// fin plutôt que par un aplat.
+    static let card = Color.clear
+    static let ink = Color(hex: 0x151221)
+    static let secondary = Color(hex: 0x726B87)
+    static let line = Color(hex: 0xE9DFFF)
+    /// Filet qui dessine le contour des cartes.
+    static let cardLine = Color(hex: 0x8C7CB4).opacity(0.26)
     static let positive = Color(hex: 0x21B978)
     static let negative = Color(hex: 0xEF5B64)
     static let warning = Color(hex: 0xF0A23A)
+
+    static let heroGradient = LinearGradient(
+        colors: [primary, primaryDeep],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
 }
 
 extension Color {
@@ -32,13 +44,12 @@ struct CardStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(padding)
-            .background(AppTheme.card)
+            .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .stroke(AppTheme.line.opacity(0.7), lineWidth: 0.5)
+                    .stroke(AppTheme.cardLine, lineWidth: 0.8)
             }
-            .shadow(color: AppTheme.ink.opacity(0.045), radius: 18, x: 0, y: 8)
     }
 }
 

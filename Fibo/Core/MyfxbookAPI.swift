@@ -11,10 +11,21 @@ enum MyfxbookError: LocalizedError, Equatable {
         switch self {
         case .invalidURL: "Impossible de construire la requête Myfxbook."
         case .invalidResponse: "Myfxbook a renvoyé une réponse illisible."
-        case let .api(message): message.isEmpty ? "Une erreur Myfxbook est survenue." : message
+        case let .api(message): Self.localizedAPIMessage(message)
         case .authenticationRequired: "La session Myfxbook a expiré."
         case .accountNotFound: "Aucun compte de trading n’est disponible dans Myfxbook."
         }
+    }
+
+    private static func localizedAPIMessage(_ message: String) -> String {
+        let normalized = message.lowercased()
+        if normalized.contains("wrong email/password") || normalized.contains("wrong email or password") {
+            return "L’adresse e-mail ou le mot de passe Myfxbook est incorrect."
+        }
+        if normalized.contains("max login attempts") {
+            return "Trop de tentatives Myfxbook. Connecte-toi d’abord sur myfxbook.com, puis réessaie dans Fibo."
+        }
+        return message.isEmpty ? "Une erreur Myfxbook est survenue." : message
     }
 }
 
@@ -30,28 +41,36 @@ private struct ResponseEnvelope: Decodable {
 
 actor MyfxbookAPI {
     private let session: URLSession
+    private let cookieStorage: HTTPCookieStorage?
     private let baseURL = URL(string: "https://www.myfxbook.com/api/")!
 
     init(session: URLSession? = nil) {
         if let session {
             self.session = session
+            cookieStorage = session.configuration.httpCookieStorage
         } else {
             let configuration = URLSessionConfiguration.ephemeral
             configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
             configuration.urlCache = nil
             configuration.timeoutIntervalForRequest = 25
+            configuration.httpShouldSetCookies = true
+            configuration.httpCookieAcceptPolicy = .always
+            configuration.httpMaximumConnectionsPerHost = 1
             configuration.httpAdditionalHeaders = ["Accept": "application/json"]
             self.session = URLSession(configuration: configuration)
+            cookieStorage = configuration.httpCookieStorage
         }
     }
 
     func login(email: String, password: String) async throws -> String {
         let response: LoginResponse = try await request(
             "login.json",
-            query: [URLQueryItem(name: "email", value: email), URLQueryItem(name: "password", value: password)]
+            query: [URLQueryItem(name: "email", value: email), URLQueryItem(name: "password", value: password)],
+            requiresSession: false
         )
-        guard let session = response.session, !session.isEmpty else { throw MyfxbookError.authenticationRequired }
-        return session
+        guard let encodedSession = response.session?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !encodedSession.isEmpty else { throw MyfxbookError.invalidResponse }
+        return encodedSession.removingPercentEncoding ?? encodedSession
     }
 
     func logout(sessionID: String) async {
@@ -124,43 +143,81 @@ actor MyfxbookAPI {
 
     private func request<Response: MyfxbookResponse>(
         _ endpoint: String,
-        query: [URLQueryItem]
+        query: [URLQueryItem],
+        requiresSession: Bool = true
     ) async throws -> Response {
         guard var components = URLComponents(url: baseURL.appendingPathComponent(endpoint), resolvingAgainstBaseURL: false) else {
             throw MyfxbookError.invalidURL
         }
         components.queryItems = query
+        components.percentEncodedQuery = components.percentEncodedQuery?
+            .replacingOccurrences(of: "+", with: "%2B")
         guard let url = components.url else { throw MyfxbookError.invalidURL }
 
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: 25)
         request.httpMethod = "GET"
+        request.httpShouldHandleCookies = true
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        if let cookies = cookieStorage?.cookies(for: url), !cookies.isEmpty {
+            HTTPCookie.requestHeaderFields(with: cookies).forEach {
+                request.setValue($0.value, forHTTPHeaderField: $0.key)
+            }
+        }
 
-        let (data, response) = try await session.data(for: request)
-        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+        debugLog("→ \(endpoint)")
+
+        let result: (Data, URLResponse)
+        do {
+            result = try await session.data(for: request)
+        } catch {
+            let networkError = error as NSError
+            debugLog("✕ \(endpoint) network \(networkError.domain) \(networkError.code)")
+            throw error
+        }
+
+        let (data, response) = result
+        guard let http = response as? HTTPURLResponse else {
+            debugLog("✕ \(endpoint) non-HTTP response")
             throw MyfxbookError.invalidResponse
         }
+        debugLog("← \(endpoint) HTTP \(http.statusCode)")
+        guard (200..<300).contains(http.statusCode) else { throw MyfxbookError.invalidResponse }
 
         let envelope: ResponseEnvelope
         do {
             envelope = try JSONDecoder().decode(ResponseEnvelope.self, from: data)
         } catch {
+            debugLog("✕ \(endpoint) unreadable JSON (\(data.count) bytes)")
             throw MyfxbookError.invalidResponse
         }
 
         if envelope.error {
+            debugLog("✕ \(endpoint) Myfxbook: \(envelope.message)")
             let lowercased = envelope.message.lowercased()
-            if lowercased.contains("session") || lowercased.contains("login") || lowercased.contains("authentication") {
+            if requiresSession && (
+                lowercased.contains("session") ||
+                lowercased.contains("login") ||
+                lowercased.contains("authentication")
+            ) {
                 throw MyfxbookError.authenticationRequired
             }
             throw MyfxbookError.api(envelope.message)
         }
 
         do {
-            return try JSONDecoder().decode(Response.self, from: data)
+            let decoded = try JSONDecoder().decode(Response.self, from: data)
+            debugLog("✓ \(endpoint)")
+            return decoded
         } catch {
+            debugLog("✕ \(endpoint) unexpected JSON structure")
             throw MyfxbookError.invalidResponse
         }
+    }
+
+    private func debugLog(_ message: String) {
+#if DEBUG
+        print("[Fibo/Myfxbook] \(message)")
+#endif
     }
 }
 

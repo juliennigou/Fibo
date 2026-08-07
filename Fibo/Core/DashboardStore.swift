@@ -24,6 +24,7 @@ final class DashboardStore: ObservableObject {
     private let defaults: UserDefaults
     private let preferredAccountKey = "preferredMyfxbookAccountID"
     private let previewMode: Bool
+    private let loginPreviewMode: Bool
 
     init(
         api: MyfxbookAPI = MyfxbookAPI(),
@@ -36,17 +37,24 @@ final class DashboardStore: ObservableObject {
         self.cache = cache
         self.defaults = defaults
         previewMode = ProcessInfo.processInfo.arguments.contains("--demo")
-        let cached = previewMode ? PreviewData.snapshot : cache.load()
+        loginPreviewMode = ProcessInfo.processInfo.arguments.contains("--login-preview")
+        let cached: DashboardSnapshot? = loginPreviewMode ? nil : (previewMode ? PreviewData.snapshot : cache.load())
         snapshot = cached
-        state = previewMode ? .ready : (keychain.loadCredentials() == nil ? .signedOut : (cached == nil ? .loading : .ready))
-        isShowingCachedData = !previewMode && cached != nil
+        state = loginPreviewMode
+            ? .signedOut
+            : (previewMode ? .ready : (keychain.loadCredentials() == nil ? .signedOut : (cached == nil ? .loading : .ready)))
+        isShowingCachedData = !previewMode && !loginPreviewMode && cached != nil
     }
 
-    var isAuthenticated: Bool { previewMode || keychain.loadCredentials() != nil }
+    var isAuthenticated: Bool { !loginPreviewMode && (previewMode || keychain.loadCredentials() != nil) }
     var hasContent: Bool { snapshot != nil }
     var account: TradingAccount? { snapshot?.account }
 
     func bootstrap() async {
+        if loginPreviewMode {
+            state = .signedOut
+            return
+        }
         if previewMode { return }
         guard isAuthenticated else {
             state = .signedOut
@@ -62,7 +70,16 @@ final class DashboardStore: ObservableObject {
             let sessionID = try await api.login(email: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password)
             try keychain.saveCredentials(email: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password)
             try keychain.saveSession(sessionID)
-            try await loadRemoteData(sessionID: sessionID)
+            do {
+                try await loadRemoteData(sessionID: sessionID)
+            } catch MyfxbookError.authenticationRequired {
+                let renewedSession = try await api.login(
+                    email: email.trimmingCharacters(in: .whitespacesAndNewlines),
+                    password: password
+                )
+                try keychain.saveSession(renewedSession)
+                try await loadRemoteData(sessionID: renewedSession)
+            }
             return true
         } catch {
             keychain.clearAll()

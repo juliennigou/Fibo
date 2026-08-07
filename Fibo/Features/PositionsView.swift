@@ -3,6 +3,11 @@ import SwiftUI
 struct PositionsView: View {
     @EnvironmentObject private var store: DashboardStore
     @State private var selectedPosition: OpenPosition?
+    private let sectionSelection: Binding<Int>?
+
+    init(sectionSelection: Binding<Int>? = nil) {
+        self.sectionSelection = sectionSelection
+    }
 
     var body: some View {
         NavigationStack {
@@ -16,6 +21,10 @@ struct PositionsView: View {
                             trailingSymbol: "arrow.clockwise",
                             trailingAction: { Task { await store.refresh() } }
                         )
+
+                        if let sectionSelection {
+                            ActivityPagePicker(selection: sectionSelection)
+                        }
 
                         if let snapshot = store.snapshot {
                             exposureCard(snapshot)
@@ -53,11 +62,11 @@ struct PositionsView: View {
                 value: AppFormat.currency(floating, code: snapshot.account.currency, showSign: true),
                 tint: floating >= 0 ? AppTheme.positive : AppTheme.negative
             )
-            Divider().frame(height: 48).overlay(AppTheme.line).padding(.horizontal, 16)
+            Divider().frame(height: 48).overlay(AppTheme.cardLine).padding(.horizontal, 16)
             exposureMetric(
                 label: "Volume total",
                 value: "\(AppFormat.decimal(totalLots)) lots",
-                tint: AppTheme.blue
+                tint: AppTheme.primary
             )
         }
         .frame(maxWidth: .infinity)
@@ -151,7 +160,7 @@ private struct PositionCard: View {
                 }
             }
 
-            Divider().overlay(AppTheme.line)
+            Divider().overlay(AppTheme.cardLine)
 
             HStack {
                 valueBlock("Volume", "\(AppFormat.decimal(position.size)) \(position.sizeType)")
@@ -262,7 +271,7 @@ private struct PositionDetailView: View {
             .font(.subheadline)
             .padding(.horizontal, 14)
             .padding(.vertical, 14)
-            if divider { Divider().overlay(AppTheme.line).padding(.leading, 14) }
+            if divider { Divider().overlay(AppTheme.cardLine).padding(.leading, 14) }
         }
     }
 }

@@ -21,4 +21,33 @@ final class ModelTests: XCTestCase {
         )
         XCTAssertEqual(transaction.netProfit, 94.31, accuracy: 0.001)
     }
+
+    func testProjectionTaxesOnlyPositiveGain() {
+        let result = ProjectionCalculator.result(
+            capital: 10_000,
+            monthlyRatePercent: 0,
+            taxRatePercent: 30,
+            months: 120
+        )
+
+        XCTAssertEqual(result.grossCapital, 10_000, accuracy: 0.001)
+        XCTAssertEqual(result.taxableGain, 0, accuracy: 0.001)
+        XCTAssertEqual(result.estimatedTax, 0, accuracy: 0.001)
+        XCTAssertEqual(result.netCapital, 10_000, accuracy: 0.001)
+    }
+
+    func testProjectionCompoundsAndAppliesTaxToGain() {
+        let result = ProjectionCalculator.result(
+            capital: 10_000,
+            monthlyRatePercent: 1,
+            taxRatePercent: 30,
+            months: 12
+        )
+        let expectedGross = 10_000.0 * Foundation.pow(1.01, 12.0)
+        let expectedTax = (expectedGross - 10_000) * 0.30
+
+        XCTAssertEqual(result.grossCapital, expectedGross, accuracy: 0.001)
+        XCTAssertEqual(result.estimatedTax, expectedTax, accuracy: 0.001)
+        XCTAssertEqual(result.netCapital, expectedGross - expectedTax, accuracy: 0.001)
+    }
 }
