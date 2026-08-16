@@ -53,8 +53,25 @@ struct CardStyle: ViewModifier {
     }
 }
 
+private struct SensitiveAmountModifier: ViewModifier {
+    let isSensitive: Bool
+    @AppStorage(AppPreferenceKey.amountsHidden) private var amountsHidden = false
+
+    func body(content: Content) -> some View {
+        let isHidden = isSensitive && amountsHidden
+        content
+            .blur(radius: isHidden ? 7 : 0)
+            .accessibilityHidden(isHidden)
+            .animation(.easeInOut(duration: 0.18), value: isHidden)
+    }
+}
+
 extension View {
     func appCard(padding: CGFloat = 20) -> some View {
         modifier(CardStyle(padding: padding))
+    }
+
+    func sensitiveAmount(_ isSensitive: Bool = true) -> some View {
+        modifier(SensitiveAmountModifier(isSensitive: isSensitive))
     }
 }

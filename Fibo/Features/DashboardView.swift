@@ -3,14 +3,18 @@ import SwiftUI
 
 struct DashboardView: View {
     @EnvironmentObject private var store: DashboardStore
+    @AppStorage(AppPreferenceKey.portfolioSplitEnabled) private var isPortfolioSplitEnabled = false
+    @AppStorage(AppPreferenceKey.amountsHidden) private var amountsHidden = false
     @State private var chartRange: ChartRange = .all
+    @State private var selectedAllocation: PortfolioAllocation = .total
+    @State private var showsPerformanceAsPercentage = false
 
     var body: some View {
         NavigationStack {
             ZStack {
                 AppTheme.background.ignoresSafeArea()
                 if let snapshot = store.snapshot {
-                    content(snapshot)
+                    pages(snapshot)
                 } else {
                     unavailable
                 }
@@ -19,8 +23,27 @@ struct DashboardView: View {
         }
     }
 
-    private func content(_ snapshot: DashboardSnapshot) -> some View {
-        ScrollView {
+    @ViewBuilder
+    private func pages(_ snapshot: DashboardSnapshot) -> some View {
+        if isPortfolioSplitEnabled {
+            TabView(selection: $selectedAllocation) {
+                ForEach(PortfolioAllocation.allCases) { allocation in
+                    content(snapshot, allocation: allocation)
+                        .tag(allocation)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+        } else {
+            content(snapshot, allocation: .total)
+        }
+    }
+
+    private func content(_ snapshot: DashboardSnapshot, allocation: PortfolioAllocation) -> some View {
+        let result = allocationResult(for: snapshot)
+        let allocationPoints = result.points(for: allocation)
+        let points = filteredPoints(allocationPoints)
+
+        return ScrollView {
             LazyVStack(spacing: 20) {
                 AppHeader(
                     title: "Portfolio",
@@ -37,17 +60,27 @@ struct DashboardView: View {
                     cachedBanner(snapshot.fetchedAt)
                 }
 
-                portfolioCard(snapshot)
+                portfolioSection(snapshot, allocation: allocation, result: result)
 
-                PaceRow(snapshot: snapshot)
+                PaceRow(
+                    snapshot: snapshot,
+                    points: allocationPoints,
+                    balance: result.balance(for: allocation),
+                    floatingProfitMultiplier: result.currentShare(for: allocation)
+                )
 
                 ResultBarsCard(
-                    points: filteredPoints(snapshot.daily),
+                    points: points,
+                    calendarPoints: allocationPoints,
+                    history: snapshot.history,
                     range: chartRange,
                     currency: snapshot.account.currency
                 )
 
-                positionsPreview(snapshot)
+                positionsPreview(
+                    snapshot,
+                    profitMultiplier: result.currentShare(for: allocation)
+                )
             }
             .padding(.horizontal, 18)
             .padding(.top, 18)
@@ -56,9 +89,45 @@ struct DashboardView: View {
         .refreshable { await store.refresh() }
     }
 
-    private func portfolioCard(_ snapshot: DashboardSnapshot) -> some View {
-        let points = filteredPoints(snapshot.daily)
-        let periodProfit = points.reduce(0) { $0 + $1.profit }
+    private func portfolioSection(
+        _ snapshot: DashboardSnapshot,
+        allocation: PortfolioAllocation,
+        result: PortfolioAllocationResult
+    ) -> some View {
+        VStack(spacing: 10) {
+            portfolioCard(snapshot, allocation: allocation, result: result)
+
+            if isPortfolioSplitEnabled {
+                HStack(spacing: 6) {
+                    ForEach(PortfolioAllocation.allCases) { page in
+                        Circle()
+                            .fill(page == selectedAllocation ? AppTheme.primary : AppTheme.secondary.opacity(0.25))
+                            .frame(width: page == selectedAllocation ? 7 : 5, height: page == selectedAllocation ? 7 : 5)
+                    }
+                }
+                .frame(height: 7)
+                .animation(.easeInOut(duration: 0.2), value: selectedAllocation)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Page \(selectedAllocation.rawValue + 1) sur \(PortfolioAllocation.allCases.count)")
+            }
+        }
+    }
+
+    private func portfolioCard(
+        _ snapshot: DashboardSnapshot,
+        allocation: PortfolioAllocation,
+        result: PortfolioAllocationResult
+    ) -> some View {
+        let points = filteredPoints(result.points(for: allocation))
+        let balance = result.balance(for: allocation)
+        let periodProfit = chartRange == .all
+            ? result.profitSinceStart(for: allocation)
+            : points.reduce(0) { $0 + $1.profit }
+        let performance = performancePercentage(
+            profit: periodProfit,
+            balance: balance,
+            investedCapital: result.investedCapital(for: allocation)
+        )
 
         return ZStack {
             SpiralWatermark()
@@ -76,12 +145,23 @@ struct DashboardView: View {
                         Text("Solde")
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.white.opacity(0.82))
-                        Text(AppFormat.currency(snapshot.account.balance, code: snapshot.account.currency))
-                            .font(.system(size: 38, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .tracking(-1)
-                            .minimumScaleFactor(0.7)
-                            .lineLimit(1)
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.18)) {
+                                amountsHidden.toggle()
+                            }
+                        } label: {
+                            Text(AppFormat.currency(balance, code: snapshot.account.currency))
+                                .font(.system(size: 38, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .tracking(-1)
+                                .minimumScaleFactor(0.7)
+                                .lineLimit(1)
+                                .sensitiveAmount()
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(amountsHidden ? "Afficher les montants" : "Masquer les montants")
+                        .accessibilityHint("Ce réglage s’applique à toute l’application")
                     }
                     Spacer()
                     Label(
@@ -96,14 +176,34 @@ struct DashboardView: View {
                     .clipShape(Capsule())
                 }
 
-                HStack(spacing: 8) {
-                    Text(AppFormat.currency(periodProfit, code: snapshot.account.currency, showSign: true))
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showsPerformanceAsPercentage.toggle()
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Text(
+                            showsPerformanceAsPercentage
+                                ? AppFormat.percent(performance, showSign: true)
+                                : AppFormat.currency(periodProfit, code: snapshot.account.currency, showSign: true)
+                        )
                         .font(.subheadline.weight(.bold))
                         .foregroundStyle(periodProfit >= 0 ? AppTheme.lime : AppTheme.negative)
-                    Text(label(for: chartRange))
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.66))
+                        .contentTransition(.numericText())
+                        .sensitiveAmount()
+                        Text(label(for: chartRange))
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.66))
+                    }
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    amountsHidden
+                        ? "Performance \(label(for: chartRange)), montant masqué"
+                        : "Performance \(label(for: chartRange)), \(showsPerformanceAsPercentage ? AppFormat.percent(performance, showSign: true) : AppFormat.currency(periodProfit, code: snapshot.account.currency, showSign: true))"
+                )
+                .accessibilityHint(showsPerformanceAsPercentage ? "Toucher pour afficher le montant" : "Toucher pour afficher le pourcentage")
 
                 BalanceChart(
                     points: points,
@@ -156,10 +256,33 @@ struct DashboardView: View {
             RoundedRectangle(cornerRadius: 30, style: .continuous)
                 .stroke(.white.opacity(0.12), lineWidth: 1)
         }
-        .shadow(color: AppTheme.primary.opacity(0.24), radius: 24, x: 0, y: 12)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(
+            amountsHidden
+                ? "Capital masqué"
+                : "Capital investi \(AppFormat.currency(result.investedCapital(for: allocation), code: snapshot.account.currency))"
+        )
     }
 
-    private func positionsPreview(_ snapshot: DashboardSnapshot) -> some View {
+    private func allocationResult(for snapshot: DashboardSnapshot) -> PortfolioAllocationResult {
+        PortfolioAllocationCalculator.result(
+            contributions: store.portfolioContributions,
+            daily: snapshot.daily,
+            currentBalance: snapshot.account.balance,
+            currentDate: snapshot.fetchedAt
+        )
+    }
+
+    private func performancePercentage(profit: Double, balance: Double, investedCapital: Double) -> Double {
+        let base = chartRange == .all ? investedCapital : balance - profit
+        guard abs(base) > 0.01 else { return 0 }
+        return profit / abs(base) * 100
+    }
+
+    private func positionsPreview(
+        _ snapshot: DashboardSnapshot,
+        profitMultiplier: Double
+    ) -> some View {
         VStack(spacing: 13) {
             SectionTitle(
                 title: "Positions ouvertes",
@@ -175,7 +298,11 @@ struct DashboardView: View {
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(snapshot.positions.prefix(3).enumerated()), id: \.element.id) { index, position in
-                        PositionCompactRow(position: position, currency: snapshot.account.currency)
+                        PositionCompactRow(
+                            position: position,
+                            currency: snapshot.account.currency,
+                            profitMultiplier: profitMultiplier
+                        )
                         if index < min(snapshot.positions.count, 3) - 1 {
                             Divider().overlay(AppTheme.cardLine).padding(.leading, 48)
                         }
@@ -332,6 +459,7 @@ private struct SpiralWatermark: Shape {
 struct PositionCompactRow: View {
     let position: OpenPosition
     let currency: String
+    var profitMultiplier = 1.0
 
     var body: some View {
         HStack(spacing: 12) {
@@ -350,7 +478,7 @@ struct PositionCompactRow: View {
                     .foregroundStyle(AppTheme.secondary)
             }
             Spacer()
-            ProfitText(value: position.profit + position.swap, currency: currency)
+            ProfitText(value: (position.profit + position.swap) * profitMultiplier, currency: currency)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 11)
@@ -362,22 +490,31 @@ struct PositionCompactRow: View {
 /// Trois chiffres de tempo sous le graphe : ce que la courbe ne montre pas d'un coup d'œil.
 private struct PaceRow: View {
     let snapshot: DashboardSnapshot
+    let points: [DailyPoint]
+    let balance: Double
+    let floatingProfitMultiplier: Double
 
     private var todayProfit: Double {
-        snapshot.daily.last { Calendar.current.isDateInToday($0.date) }?.profit ?? 0
+        points
+            .filter { Calendar.current.isDateInToday($0.date) }
+            .reduce(0) { $0 + $1.profit }
     }
 
     private var monthProfit: Double {
         let calendar = Calendar.current
-        return snapshot.daily
+        return points
             .filter { calendar.isDate($0.date, equalTo: Date(), toGranularity: .month) }
             .reduce(0) { $0 + $1.profit }
+    }
+
+    private var floatingProfit: Double {
+        snapshot.account.floatingProfit * floatingProfitMultiplier
     }
 
     /// Pourcentage recalculé depuis le montant affiché : les gains journaliers et
     /// mensuels renvoyés par Myfxbook ne portent pas toujours le même signe.
     private func share(of amount: Double) -> Double {
-        let base = snapshot.account.balance - amount
+        let base = balance - amount
         guard abs(base) > 0.01 else { return 0 }
         return amount / abs(base) * 100
     }
@@ -409,9 +546,9 @@ private struct PaceRow: View {
             divider
             column(
                 title: "Flottant",
-                value: AppFormat.currency(snapshot.account.floatingProfit, code: snapshot.account.currency, showSign: true),
+                value: AppFormat.currency(floatingProfit, code: snapshot.account.currency, showSign: true),
                 detail: positionsLabel,
-                amount: snapshot.account.floatingProfit
+                amount: floatingProfit
             )
         }
         .padding(.vertical, 2)
@@ -435,11 +572,13 @@ private struct PaceRow: View {
                 .foregroundStyle(tint(amount))
                 .lineLimit(1)
                 .minimumScaleFactor(0.65)
+                .sensitiveAmount()
             Text(detail)
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(AppTheme.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
+                .sensitiveAmount(title != "Flottant")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 12)
@@ -459,12 +598,15 @@ private struct PaceRow: View {
 /// choisie (jour, semaine, mois) et une barre peut être sélectionnée au doigt.
 private struct ResultBarsCard: View {
     let points: [DailyPoint]
+    let calendarPoints: [DailyPoint]
+    let history: [TradeTransaction]
     let range: ChartRange
     let currency: String
     /// `true` : carte violette profonde (inverse du reste de l'écran).
     var isDark = true
 
     @State private var selectedDate: Date?
+    @State private var isShowingCalendar = ProcessInfo.processInfo.arguments.contains("--calendar")
 
     private var primaryText: Color { isDark ? .white : AppTheme.ink }
     private var secondaryText: Color { isDark ? .white.opacity(0.6) : AppTheme.secondary }
@@ -573,10 +715,17 @@ private struct ResultBarsCard: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: range)
+        .fullScreenCover(isPresented: $isShowingCalendar) {
+            PerformanceCalendarView(
+                points: calendarPoints,
+                history: history,
+                currency: currency
+            )
+        }
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 3) {
                 Text(selectedBucket == nil ? "Résultat \(stepLabel)" : label(for: selectedBucket!.date))
                     .font(.system(size: 15, weight: .bold, design: .rounded))
@@ -590,6 +739,24 @@ private struct ResultBarsCard: View {
                 .font(.system(size: 17, weight: .bold, design: .rounded))
                 .foregroundStyle(tint(selectedBucket?.value ?? total))
                 .contentTransition(.numericText())
+                .lineLimit(1)
+                .minimumScaleFactor(0.72)
+                .sensitiveAmount()
+            Button {
+                isShowingCalendar = true
+            } label: {
+                Image(systemName: "calendar")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(isDark ? AppTheme.lime : AppTheme.primary)
+                    .frame(width: 34, height: 34)
+                    .background(isDark ? Color.white.opacity(0.09) : AppTheme.primarySoft)
+                    .clipShape(Circle())
+                    .overlay {
+                        Circle().stroke(isDark ? Color.white.opacity(0.1) : AppTheme.cardLine, lineWidth: 0.7)
+                    }
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Ouvrir le calendrier des performances")
         }
     }
 
@@ -629,11 +796,13 @@ private struct ResultBarsCard: View {
             if let best, best.value > 0 {
                 Text("Meilleur \(AppFormat.currency(best.value, code: currency, showSign: true))")
                     .foregroundStyle(upColor)
+                    .sensitiveAmount()
             }
             if let worst, worst.value < 0 {
                 Text("·").foregroundStyle(ruleColor)
                 Text("Pire \(AppFormat.currency(worst.value, code: currency, showSign: true))")
                     .foregroundStyle(AppTheme.negative)
+                    .sensitiveAmount()
             }
             Spacer()
         }

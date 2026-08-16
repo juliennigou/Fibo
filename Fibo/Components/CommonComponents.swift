@@ -119,6 +119,7 @@ struct MetricCard: View {
                     .foregroundStyle(AppTheme.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
+                    .sensitiveAmount()
                 Text(title)
                     .font(.caption)
                     .foregroundStyle(AppTheme.secondary)
@@ -184,6 +185,7 @@ struct ProfitText: View {
         Text(AppFormat.currency(value, code: currency, showSign: true))
             .font(font)
             .foregroundStyle(value >= 0 ? AppTheme.positive : AppTheme.negative)
+            .sensitiveAmount()
     }
 }
 

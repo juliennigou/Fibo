@@ -19,8 +19,6 @@
 		B0000000000000000000000A /* Fibo/Components/CommonComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000A /* Fibo/Components/CommonComponents.swift */; };
 		B0000000000000000000000B /* Fibo/Features/OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000B /* Fibo/Features/OnboardingView.swift */; };
 		B0000000000000000000000C /* Fibo/Features/RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000C /* Fibo/Features/RootView.swift */; };
-		B00000000000000000000019 /* Fibo/Features/SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000020 /* Fibo/Features/SplashView.swift */; };
-		B0000000000000000000001A /* Fibo/Features/ProjectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000021 /* Fibo/Features/ProjectionView.swift */; };
 		B0000000000000000000000D /* Fibo/Features/DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000D /* Fibo/Features/DashboardView.swift */; };
 		B0000000000000000000000E /* Fibo/Features/PositionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000E /* Fibo/Features/PositionsView.swift */; };
 		B0000000000000000000000F /* Fibo/Features/ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000000000000000000000F /* Fibo/Features/ActivityView.swift */; };
@@ -32,6 +30,9 @@
 		B00000000000000000000016 /* Fibo/Resources/AppIcon60x60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000017 /* Fibo/Resources/AppIcon60x60@3x.png */; };
 		B00000000000000000000017 /* Fibo/Resources/FiboBrandIcon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000018 /* Fibo/Resources/FiboBrandIcon@2x.png */; };
 		B00000000000000000000018 /* Fibo/Resources/FiboBrandIcon@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000019 /* Fibo/Resources/FiboBrandIcon@3x.png */; };
+		B00000000000000000000019 /* Fibo/Features/SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000020 /* Fibo/Features/SplashView.swift */; };
+		B0000000000000000000001A /* Fibo/Features/ProjectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000021 /* Fibo/Features/ProjectionView.swift */; };
+		B0000000000000000000001B /* Fibo/Features/PerformanceCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000022 /* Fibo/Features/PerformanceCalendarView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,8 +58,6 @@
 		F0000000000000000000000A /* Fibo/Components/CommonComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Components/CommonComponents.swift; sourceTree = "<group>"; };
 		F0000000000000000000000B /* Fibo/Features/OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/OnboardingView.swift; sourceTree = "<group>"; };
 		F0000000000000000000000C /* Fibo/Features/RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/RootView.swift; sourceTree = "<group>"; };
-		F00000000000000000000020 /* Fibo/Features/SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/SplashView.swift; sourceTree = "<group>"; };
-		F00000000000000000000021 /* Fibo/Features/ProjectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/ProjectionView.swift; sourceTree = "<group>"; };
 		F0000000000000000000000D /* Fibo/Features/DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/DashboardView.swift; sourceTree = "<group>"; };
 		F0000000000000000000000E /* Fibo/Features/PositionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/PositionsView.swift; sourceTree = "<group>"; };
 		F0000000000000000000000F /* Fibo/Features/ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/ActivityView.swift; sourceTree = "<group>"; };
@@ -72,6 +71,9 @@
 		F00000000000000000000017 /* Fibo/Resources/AppIcon60x60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Fibo/Resources/AppIcon60x60@3x.png"; sourceTree = "<group>"; };
 		F00000000000000000000018 /* Fibo/Resources/FiboBrandIcon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Fibo/Resources/FiboBrandIcon@2x.png"; sourceTree = "<group>"; };
 		F00000000000000000000019 /* Fibo/Resources/FiboBrandIcon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Fibo/Resources/FiboBrandIcon@3x.png"; sourceTree = "<group>"; };
+		F00000000000000000000020 /* Fibo/Features/SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/SplashView.swift; sourceTree = "<group>"; };
+		F00000000000000000000021 /* Fibo/Features/ProjectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/ProjectionView.swift; sourceTree = "<group>"; };
+		F00000000000000000000022 /* Fibo/Features/PerformanceCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fibo/Features/PerformanceCalendarView.swift; sourceTree = "<group>"; };
 		R00000000000000000000001 /* Fibo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fibo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		R00000000000000000000002 /* FiboTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FiboTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -122,6 +124,7 @@
 				F00000000000000000000020 /* Fibo/Features/SplashView.swift */,
 				F00000000000000000000021 /* Fibo/Features/ProjectionView.swift */,
 				F0000000000000000000000D /* Fibo/Features/DashboardView.swift */,
+				F00000000000000000000022 /* Fibo/Features/PerformanceCalendarView.swift */,
 				F0000000000000000000000E /* Fibo/Features/PositionsView.swift */,
 				F0000000000000000000000F /* Fibo/Features/ActivityView.swift */,
 				F00000000000000000000010 /* Fibo/Features/SettingsView.swift */,
@@ -271,6 +274,7 @@
 				B00000000000000000000019 /* Fibo/Features/SplashView.swift in Sources */,
 				B0000000000000000000001A /* Fibo/Features/ProjectionView.swift in Sources */,
 				B0000000000000000000000D /* Fibo/Features/DashboardView.swift in Sources */,
+				B0000000000000000000001B /* Fibo/Features/PerformanceCalendarView.swift in Sources */,
 				B0000000000000000000000E /* Fibo/Features/PositionsView.swift in Sources */,
 				B0000000000000000000000F /* Fibo/Features/ActivityView.swift in Sources */,
 				B00000000000000000000010 /* Fibo/Features/SettingsView.swift in Sources */,

@@ -17,12 +17,15 @@ final class DashboardStore: ObservableObject {
     @Published private(set) var accounts: [TradingAccount] = []
     @Published private(set) var errorMessage: String?
     @Published private(set) var isShowingCachedData = false
+    @Published private(set) var portfolioContributions: [PortfolioContribution] = []
 
     private let api: MyfxbookAPI
     private let keychain: KeychainStore
     private let cache: SnapshotCache
     private let defaults: UserDefaults
     private let preferredAccountKey = "preferredMyfxbookAccountID"
+    private let portfolioContributionsKeyPrefix = "portfolioContributions"
+    private let portfolioAllocationBasisKeyPrefix = "portfolioAllocationBasis"
     private let previewMode: Bool
     private let loginPreviewMode: Bool
 
@@ -40,6 +43,14 @@ final class DashboardStore: ObservableObject {
         loginPreviewMode = ProcessInfo.processInfo.arguments.contains("--login-preview")
         let cached: DashboardSnapshot? = loginPreviewMode ? nil : (previewMode ? PreviewData.snapshot : cache.load())
         snapshot = cached
+        portfolioContributions = cached.map {
+            Self.loadOrCreatePortfolioContributions(
+                from: $0,
+                defaults: defaults,
+                contributionsKeyPrefix: "portfolioContributions",
+                legacyBasisKeyPrefix: "portfolioAllocationBasis"
+            )
+        } ?? []
         state = loginPreviewMode
             ? .signedOut
             : (previewMode ? .ready : (keychain.loadCredentials() == nil ? .signedOut : (cached == nil ? .loading : .ready)))
@@ -132,8 +143,14 @@ final class DashboardStore: ObservableObject {
         keychain.clearAll()
         cache.clear()
         defaults.removeObject(forKey: preferredAccountKey)
+        let accountIDs = Set(accounts.map(\.id) + [snapshot?.account.id].compactMap { $0 })
+        for accountID in accountIDs {
+            defaults.removeObject(forKey: portfolioContributionsKey(for: accountID))
+            defaults.removeObject(forKey: portfolioAllocationBasisKey(for: accountID))
+        }
         accounts = []
         snapshot = nil
+        portfolioContributions = []
         errorMessage = nil
         isShowingCachedData = false
         state = .signedOut
@@ -141,6 +158,47 @@ final class DashboardStore: ObservableObject {
 
     func dismissError() {
         errorMessage = nil
+    }
+
+    func addPortfolioContribution(owner: PortfolioOwner, amount: Double, date: Date) {
+        guard amount > 0, let snapshot else { return }
+        portfolioContributions.append(
+            PortfolioContribution(
+                owner: owner,
+                amount: amount,
+                date: Calendar.current.startOfDay(for: date)
+            )
+        )
+        persistPortfolioContributions(accountID: snapshot.account.id)
+    }
+
+    func updatePortfolioContribution(id: UUID, owner: PortfolioOwner, amount: Double, date: Date) {
+        guard amount > 0,
+              let snapshot,
+              let index = portfolioContributions.firstIndex(where: { $0.id == id }) else { return }
+        let existing = portfolioContributions[index]
+        let normalizedDate = Calendar.current.startOfDay(for: date)
+        portfolioContributions[index] = PortfolioContribution(
+            id: existing.id,
+            owner: owner,
+            amount: amount,
+            date: normalizedDate,
+            profitBeforeContributionOnDate: Calendar.current.isDate(existing.date, inSameDayAs: normalizedDate)
+                ? existing.profitBeforeContributionOnDate
+                : nil,
+            personalBalanceBeforeContribution: existing.owner == owner
+                && existing.amount == amount
+                && Calendar.current.isDate(existing.date, inSameDayAs: normalizedDate)
+                ? existing.personalBalanceBeforeContribution
+                : nil
+        )
+        persistPortfolioContributions(accountID: snapshot.account.id)
+    }
+
+    func deletePortfolioContribution(id: UUID) {
+        guard let snapshot else { return }
+        portfolioContributions.removeAll { $0.id == id }
+        persistPortfolioContributions(accountID: snapshot.account.id)
     }
 
     private func loadRemoteData(sessionID: String) async throws {
@@ -163,19 +221,100 @@ final class DashboardStore: ObservableObject {
         async let history = api.history(sessionID: sessionID, accountID: selected.id)
         async let daily = api.dailyData(sessionID: sessionID, accountID: selected.id, start: start, end: Date())
 
-        let newSnapshot = try await DashboardSnapshot(
-            fetchedAt: Date(),
+        let loadedPositions = try await positions
+        let loadedOrders = try await orders
+        let loadedHistory = try await history
+        let loadedDaily = try await daily
+        let fetchedAt = Date()
+        let newSnapshot = DashboardSnapshot(
+            fetchedAt: fetchedAt,
             account: selected,
-            positions: positions,
-            orders: orders,
-            history: history,
-            daily: daily
+            positions: loadedPositions,
+            orders: loadedOrders,
+            history: loadedHistory,
+            daily: loadedDaily
+        )
+        portfolioContributions = Self.loadOrCreatePortfolioContributions(
+            from: newSnapshot,
+            defaults: defaults,
+            contributionsKeyPrefix: portfolioContributionsKeyPrefix,
+            legacyBasisKeyPrefix: portfolioAllocationBasisKeyPrefix
         )
         snapshot = newSnapshot
         cache.save(newSnapshot)
         isShowingCachedData = false
         errorMessage = nil
         state = .ready
+    }
+
+    private func persistPortfolioContributions(accountID: Int) {
+        guard let data = try? JSONEncoder().encode(portfolioContributions) else { return }
+        defaults.set(data, forKey: portfolioContributionsKey(for: accountID))
+    }
+
+    private func portfolioContributionsKey(for accountID: Int) -> String {
+        "\(portfolioContributionsKeyPrefix).\(accountID)"
+    }
+
+    private func portfolioAllocationBasisKey(for accountID: Int) -> String {
+        "\(portfolioAllocationBasisKeyPrefix).\(accountID)"
+    }
+
+    private static func loadPortfolioAllocationBasis(
+        accountID: Int,
+        defaults: UserDefaults,
+        keyPrefix: String
+    ) -> PortfolioAllocationBasis? {
+        guard let data = defaults.data(forKey: "\(keyPrefix).\(accountID)") else { return nil }
+        return try? JSONDecoder().decode(PortfolioAllocationBasis.self, from: data)
+    }
+
+    private static func loadOrCreatePortfolioContributions(
+        from snapshot: DashboardSnapshot,
+        defaults: UserDefaults,
+        contributionsKeyPrefix: String,
+        legacyBasisKeyPrefix: String
+    ) -> [PortfolioContribution] {
+        let key = "\(contributionsKeyPrefix).\(snapshot.account.id)"
+        if let data = defaults.data(forKey: key),
+           let saved = try? JSONDecoder().decode([PortfolioContribution].self, from: data) {
+            return saved
+        }
+
+        let legacyBasis = loadPortfolioAllocationBasis(
+            accountID: snapshot.account.id,
+            defaults: defaults,
+            keyPrefix: legacyBasisKeyPrefix
+        )
+        let fatherEntryDate = legacyBasis?.fatherEntryDate ?? snapshot.fetchedAt
+        let dailyProfitAtFatherEntry = legacyBasis?.dailyProfitAtFatherEntry
+            ?? snapshot.daily.last {
+                Calendar.current.isDate($0.date, inSameDayAs: fatherEntryDate)
+            }?.profit
+            ?? 0
+        let personalEntryDate = snapshot.account.firstTradeDate
+            ?? snapshot.daily.first?.date
+            ?? snapshot.fetchedAt
+        let contributions = [
+            PortfolioContribution(
+                owner: .personal,
+                amount: PortfolioAllocationBasis.personalInitialCapital,
+                date: Calendar.current.startOfDay(for: personalEntryDate)
+            ),
+            PortfolioContribution(
+                owner: .father,
+                amount: PortfolioAllocationBasis.fatherInitialCapital,
+                date: fatherEntryDate,
+                profitBeforeContributionOnDate: dailyProfitAtFatherEntry,
+                personalBalanceBeforeContribution: (
+                    legacyBasis?.totalBalanceAtFatherEntry ?? snapshot.account.balance
+                ) - PortfolioAllocationBasis.fatherInitialCapital
+            )
+        ]
+        if let data = try? JSONEncoder().encode(contributions) {
+            defaults.set(data, forKey: key)
+        }
+        return contributions
     }
 
     private func userFacing(_ error: Error) -> String {

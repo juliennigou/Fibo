@@ -3,7 +3,9 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var store: DashboardStore
     @Environment(\.openURL) private var openURL
+    @AppStorage(AppPreferenceKey.portfolioSplitEnabled) private var isPortfolioSplitEnabled = false
     @State private var showDisconnectConfirmation = false
+    @State private var showPortfolioContributions = false
 
     var body: some View {
         NavigationStack {
@@ -21,6 +23,7 @@ struct SettingsView: View {
                             accountPicker
                         }
 
+                        displaySection
                         dataSection
                         securitySection
                         aboutSection
@@ -53,6 +56,9 @@ struct SettingsView: View {
                 Button("Annuler", role: .cancel) {}
             } message: {
                 Text("Les identifiants du Keychain et le cache hors ligne seront supprimés de cet iPhone.")
+            }
+            .sheet(isPresented: $showPortfolioContributions) {
+                PortfolioContributionsView()
             }
         }
     }
@@ -158,6 +164,62 @@ struct SettingsView: View {
         }
     }
 
+    private var displaySection: some View {
+        settingsCard(title: "Affichage") {
+            HStack(spacing: 13) {
+                Image(systemName: "rectangle.split.3x1.fill")
+                    .foregroundStyle(AppTheme.primary)
+                    .frame(width: 35, height: 35)
+                    .background(AppTheme.primary.opacity(0.1))
+                    .clipShape(Circle())
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Portefeuille partagé")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(AppTheme.ink)
+                    Text("Swipe entre le total, ton père et toi")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.secondary)
+                }
+                Spacer()
+                Toggle("Portefeuille partagé", isOn: $isPortfolioSplitEnabled)
+                    .labelsHidden()
+                    .tint(AppTheme.primary)
+            }
+            .padding(.vertical, 9)
+
+            if isPortfolioSplitEnabled {
+                Divider().overlay(AppTheme.cardLine).padding(.leading, 48)
+                Button {
+                    showPortfolioContributions = true
+                } label: {
+                    HStack(spacing: 13) {
+                        Image(systemName: "calendar.badge.plus")
+                            .foregroundStyle(AppTheme.primary)
+                            .frame(width: 35, height: 35)
+                            .background(AppTheme.primary.opacity(0.1))
+                            .clipShape(Circle())
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Gérer les apports")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(AppTheme.ink)
+                            Text("Montants et dates de versement")
+                                .font(.caption)
+                                .foregroundStyle(AppTheme.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(AppTheme.secondary)
+                    }
+                    .padding(.vertical, 9)
+                }
+                .buttonStyle(.plain)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: isPortfolioSplitEnabled)
+    }
+
     private var securitySection: some View {
         settingsCard(title: "Sécurité") {
             infoRow(
@@ -237,5 +299,164 @@ struct SettingsView: View {
             Spacer()
         }
         .padding(.vertical, 9)
+    }
+}
+
+private struct PortfolioContributionsView: View {
+    @EnvironmentObject private var store: DashboardStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var selectedContribution: PortfolioContribution?
+    @State private var isAddingContribution = false
+
+    private var contributions: [PortfolioContribution] {
+        store.portfolioContributions.sorted {
+            if Calendar.current.isDate($0.date, inSameDayAs: $1.date) {
+                return $0.owner.rawValue < $1.owner.rawValue
+            }
+            return $0.date < $1.date
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Text("Les gains de chaque journée sont répartis selon le capital de chacun présent à cette date.")
+                        .font(.footnote)
+                        .foregroundStyle(AppTheme.secondary)
+                }
+
+                Section("Historique") {
+                    ForEach(contributions) { contribution in
+                        Button {
+                            selectedContribution = contribution
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: contribution.owner == .father ? "person.fill" : "person.crop.circle.fill")
+                                    .foregroundStyle(AppTheme.primary)
+                                    .frame(width: 34, height: 34)
+                                    .background(AppTheme.primarySoft)
+                                    .clipShape(Circle())
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(contribution.owner.title)
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(AppTheme.ink)
+                                    Text(AppFormat.shortDate(contribution.date))
+                                        .font(.caption)
+                                        .foregroundStyle(AppTheme.secondary)
+                                }
+                                Spacer()
+                                Text(AppFormat.currency(contribution.amount, code: store.account?.currency ?? "EUR"))
+                                    .font(.subheadline.weight(.bold))
+                                    .foregroundStyle(AppTheme.ink)
+                                    .sensitiveAmount()
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .swipeActions {
+                            Button(role: .destructive) {
+                                store.deletePortfolioContribution(id: contribution.id)
+                            } label: {
+                                Label("Supprimer", systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.background)
+            .navigationTitle("Apports de capital")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Fermer") { dismiss() }
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        isAddingContribution = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $isAddingContribution) {
+                PortfolioContributionEditor(contribution: nil)
+            }
+            .sheet(item: $selectedContribution) { contribution in
+                PortfolioContributionEditor(contribution: contribution)
+            }
+        }
+    }
+}
+
+private struct PortfolioContributionEditor: View {
+    @EnvironmentObject private var store: DashboardStore
+    @Environment(\.dismiss) private var dismiss
+
+    let contribution: PortfolioContribution?
+    @State private var owner: PortfolioOwner
+    @State private var amount: Double
+    @State private var date: Date
+
+    init(contribution: PortfolioContribution?) {
+        self.contribution = contribution
+        _owner = State(initialValue: contribution?.owner ?? .personal)
+        _amount = State(initialValue: contribution?.amount ?? 0)
+        _date = State(initialValue: contribution?.date ?? Date())
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Attribution") {
+                    Picker("Propriétaire", selection: $owner) {
+                        ForEach(PortfolioOwner.allCases) { owner in
+                            Text(owner.title).tag(owner)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+
+                Section("Apport") {
+                    TextField(
+                        "Montant",
+                        value: $amount,
+                        format: .number.precision(.fractionLength(0...2))
+                    )
+                    .keyboardType(.decimalPad)
+                    .sensitiveAmount()
+                    DatePicker("Date", selection: $date, in: ...Date(), displayedComponents: .date)
+                }
+
+                Section {
+                    Text("Cet apport participera aux gains à partir de la date choisie.")
+                        .font(.footnote)
+                        .foregroundStyle(AppTheme.secondary)
+                }
+            }
+            .navigationTitle(contribution == nil ? "Nouvel apport" : "Modifier l’apport")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Annuler") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Enregistrer") {
+                        if let contribution {
+                            store.updatePortfolioContribution(
+                                id: contribution.id,
+                                owner: owner,
+                                amount: amount,
+                                date: date
+                            )
+                        } else {
+                            store.addPortfolioContribution(owner: owner, amount: amount, date: date)
+                        }
+                        dismiss()
+                    }
+                    .disabled(amount <= 0)
+                }
+            }
+        }
     }
 }

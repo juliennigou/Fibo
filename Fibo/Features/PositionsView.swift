@@ -60,7 +60,8 @@ struct PositionsView: View {
             exposureMetric(
                 label: "P/L flottant",
                 value: AppFormat.currency(floating, code: snapshot.account.currency, showSign: true),
-                tint: floating >= 0 ? AppTheme.positive : AppTheme.negative
+                tint: floating >= 0 ? AppTheme.positive : AppTheme.negative,
+                isSensitive: true
             )
             Divider().frame(height: 48).overlay(AppTheme.cardLine).padding(.horizontal, 16)
             exposureMetric(
@@ -73,13 +74,19 @@ struct PositionsView: View {
         .appCard()
     }
 
-    private func exposureMetric(label: String, value: String, tint: Color) -> some View {
+    private func exposureMetric(
+        label: String,
+        value: String,
+        tint: Color,
+        isSensitive: Bool = false
+    ) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(value)
                 .font(.system(.headline, design: .rounded, weight: .bold))
                 .foregroundStyle(tint)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+                .sensitiveAmount(isSensitive)
             Text(label)
                 .font(.caption)
                 .foregroundStyle(AppTheme.secondary)
@@ -167,19 +174,30 @@ private struct PositionCard: View {
                 Spacer()
                 valueBlock("Entrée", AppFormat.decimal(position.openPrice, digits: 5), alignment: .trailing)
                 Spacer()
-                valueBlock("Swap", AppFormat.currency(position.swap, code: currency, showSign: true), alignment: .trailing)
+                valueBlock(
+                    "Swap",
+                    AppFormat.currency(position.swap, code: currency, showSign: true),
+                    alignment: .trailing,
+                    isSensitive: true
+                )
             }
         }
         .appCard()
     }
 
-    private func valueBlock(_ label: String, _ value: String, alignment: HorizontalAlignment = .leading) -> some View {
+    private func valueBlock(
+        _ label: String,
+        _ value: String,
+        alignment: HorizontalAlignment = .leading,
+        isSensitive: Bool = false
+    ) -> some View {
         VStack(alignment: alignment, spacing: 4) {
             Text(label).font(.caption).foregroundStyle(AppTheme.secondary)
             Text(value)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(AppTheme.ink)
                 .lineLimit(1)
+                .sensitiveAmount(isSensitive)
         }
     }
 }
@@ -244,7 +262,12 @@ private struct PositionDetailView: View {
                             detailRow("Stop-loss", position.stopLoss == 0 ? "Non défini" : AppFormat.decimal(position.stopLoss, digits: 5))
                             detailRow("Take-profit", position.takeProfit == 0 ? "Non défini" : AppFormat.decimal(position.takeProfit, digits: 5))
                             detailRow("Pips", AppFormat.decimal(position.pips, digits: 1))
-                            detailRow("Swap", AppFormat.currency(position.swap, code: currency, showSign: true), divider: false)
+                            detailRow(
+                                "Swap",
+                                AppFormat.currency(position.swap, code: currency, showSign: true),
+                                divider: false,
+                                isSensitive: true
+                            )
                         }
                         .appCard(padding: 6)
                     }
@@ -261,12 +284,20 @@ private struct PositionDetailView: View {
         }
     }
 
-    private func detailRow(_ title: String, _ value: String, divider: Bool = true) -> some View {
+    private func detailRow(
+        _ title: String,
+        _ value: String,
+        divider: Bool = true,
+        isSensitive: Bool = false
+    ) -> some View {
         VStack(spacing: 0) {
             HStack {
                 Text(title).foregroundStyle(AppTheme.secondary)
                 Spacer()
-                Text(value).fontWeight(.semibold).foregroundStyle(AppTheme.ink)
+                Text(value)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(AppTheme.ink)
+                    .sensitiveAmount(isSensitive)
             }
             .font(.subheadline)
             .padding(.horizontal, 14)

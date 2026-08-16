@@ -191,6 +191,7 @@ private struct DailyReportCard: View {
                 Text(AppFormat.currency(day.balance, code: currency))
                     .font(.caption)
                     .foregroundStyle(AppTheme.secondary)
+                    .sensitiveAmount()
             }
         }
         .appCard(padding: 14)
