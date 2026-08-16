@@ -8,17 +8,21 @@ enum PreviewData {
             guard let date = calendar.date(byAdding: .day, value: offset - 119, to: now) else { return nil }
             let trend = Double(offset) * 5.4
             let wave = sin(Double(offset) / 7.0) * 85 + cos(Double(offset) / 13.0) * 45
-            let balance = 5480 + trend + wave
+            let personalCapitalAdjustment = 475.0
+            let tradingBalance = 5480 + trend + wave + personalCapitalAdjustment
+            let fatherDeposit = offset == 119 ? PortfolioAllocationBasis.fatherInitialCapital : 0
+            let balance = tradingBalance + fatherDeposit
             let previous = 5480 + Double(max(0, offset - 1)) * 5.4
                 + sin(Double(max(0, offset - 1)) / 7.0) * 85
                 + cos(Double(max(0, offset - 1)) / 13.0) * 45
+                + personalCapitalAdjustment
             return DailyPoint(
                 date: date,
                 balance: balance,
                 pips: (balance - previous) * 0.4,
                 lots: offset % 3 == 0 ? 0.42 : 0.14,
                 floatingProfit: 0,
-                profit: offset == 0 ? 0 : balance - previous,
+                profit: offset == 0 ? 0 : tradingBalance - previous,
                 growthEquity: 0
             )
         }
@@ -36,7 +40,7 @@ enum PreviewData {
             dailyGain: 0.62,
             monthlyGain: 3.84,
             drawdown: 4.28,
-            deposits: 6000,
+            deposits: 16000,
             withdrawals: 0,
             commission: -4.12,
             pips: 284.2,

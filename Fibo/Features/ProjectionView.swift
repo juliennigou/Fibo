@@ -243,9 +243,11 @@ struct ProjectionView: View {
                 .accessibilityLabel("Capital initial")
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: 190, alignment: .trailing)
+                .sensitiveAmount()
             Text("€")
                 .font(.system(size: 16, weight: .bold, design: .rounded))
                 .foregroundStyle(AppTheme.secondary)
+                .sensitiveAmount()
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
@@ -299,6 +301,7 @@ struct ProjectionView: View {
                     .tracking(-0.8)
                     .lineLimit(1)
                     .minimumScaleFactor(0.62)
+                    .sensitiveAmount()
                 Text("Capital net estimé dans \(selectedHorizonLabel)")
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.66))
@@ -368,6 +371,7 @@ struct ProjectionView: View {
             }
             .chartXSelection(value: $selectedMonth)
             .frame(height: 230)
+            .sensitiveAmount()
             .accessibilityLabel("Courbe de projection sur vingt ans")
             .accessibilityValue("Horizon sélectionné : \(selectedHorizonLabel)")
 
@@ -410,6 +414,7 @@ struct ProjectionView: View {
                 .foregroundStyle(color)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+                .sensitiveAmount()
         }
     }
 
